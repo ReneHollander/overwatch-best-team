@@ -1,6 +1,3 @@
-import itertools
-
-
 def auto_str(cls):
     def __str__(self):
         return '%s{%s}' % (
@@ -10,10 +7,3 @@ def auto_str(cls):
 
     cls.__str__ = __str__
     return cls
-
-def assign(lst, idx, value, fill=None):
-    if idx < len(lst):
-        lst[idx] = value
-    else:
-        lst.extend(itertools.repeat(fill, -(len(lst) - idx)))
-        lst.append(value)

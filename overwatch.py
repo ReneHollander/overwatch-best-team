@@ -6,33 +6,17 @@ class Player:
     def __init__(self, name, battletag):
         self.name = name
         self.battletag = battletag
-        self.priority_list = []
-        self.other_characters = []
+        self.weighting = {}
 
     def __repr__(self):
         return self.battletag
 
-    def allFromPool(self, pool):
-        all = []
-        for hero, weight in self.weighting.items():
-            if weight > 0 and hero in pool:
-                all.append((hero, weight))
-        all.sort(key=lambda tup: tup[1])
-        return all
+    def weightList(self, composition):
+        list = []
+        for hero in composition:
+            list.append(self.weighting[hero])
+        return list
 
-    def buildWeighting(self, gradient, heroes):
-        self.weighting = {}
-        for hero in heroes:
-            self.weighting[hero] = 0
-
-        for hero in self.other_characters:
-            self.weighting[hero] = gradient
-
-        for i in range(len(self.priority_list)):
-            l = self.priority_list[i]
-            if l is not None:
-                for hero in l:
-                    self.weighting[hero] = 1 - (i * gradient)
 
 @auto_str
 class Hero:
@@ -41,3 +25,17 @@ class Hero:
 
     def __repr__(self):
         return self.name
+
+
+def matchHeroes(heroes, composition):
+    for hero in heroes:
+        for i in range(0, len(composition)):
+            if composition[i] == hero.name:
+                composition[i] = hero
+
+
+def matchPlayers(players, lineup):
+    for player in players:
+        for i in range(0, len(lineup)):
+            if lineup[i] == player.battletag:
+                lineup[i] = player

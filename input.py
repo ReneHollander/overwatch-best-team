@@ -1,10 +1,9 @@
 import csv
 
 from overwatch import Hero, Player
-from util import assign
 
 
-def readowcsv(filename):
+def readowcsv(filename, gradient):
     heroes = []
     players = []
     with open(filename, 'rt', encoding='utf-8') as csvfile:
@@ -23,15 +22,11 @@ def readowcsv(filename):
                 player = players[i - 1]
                 item = row[i]
                 if item == "":
-                    continue
+                    player.weighting[hero] = 0
                 elif item == "✓":
-                    player.other_characters.append(hero)
-                    pass
+                    player.weighting[hero] = gradient
                 elif item.isdigit():
-                    number = int(item)
-                    if len(player.priority_list) < number or player.priority_list[number - 1] == None:
-                        assign(player.priority_list, number - 1, [])
-                    player.priority_list[number - 1].append(hero)
+                    player.weighting[hero] = 1 - ((int(item) - 1) * gradient)
                 else:
                     print("Invalid charachter in cell")
     return heroes, players
