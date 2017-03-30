@@ -26,7 +26,7 @@ def readowcsv(filename, gradient):
                 elif item == "✓":
                     player.weighting[hero] = gradient
                 elif item.isdigit():
-                    player.weighting[hero] = 1 - ((int(item) - 1) * gradient)
+                    player.weighting[hero] = float(1 - ((int(item) - 1) * gradient))
                 else:
                     print("Invalid charachter in cell")
     return heroes, players

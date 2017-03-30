@@ -1,6 +1,7 @@
 import munkres
 from munkres import Munkres
 
+from compositionbuilder import calculateIdealComposition
 from input import readowcsv
 from overwatch import matchHeroes, matchPlayers
 
@@ -20,23 +21,6 @@ print("players=" + str(players))
 print("composition=" + str(composition))
 print("lineup=" + str(lineup))
 
+picks = calculateIdealComposition(lineup, composition)
 
-def buildMatrix(lineup, composition):
-    mat = []
-    for player in lineup:
-        mat.append(player.weightList(composition))
-    return mat
-
-
-m = Munkres()
-
-matrix = buildMatrix(lineup, composition)
-cost_matrix = munkres.make_cost_matrix(matrix, lambda cost: int(100 - (cost * 100)))
-indexes = m.compute(cost_matrix)
-
-picks = {}
-
-for index in indexes:
-    picks[lineup[index[0]]] = composition[index[1]]
-
-print(picks)
+print("picks=" +str(picks))
