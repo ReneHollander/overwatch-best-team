@@ -23,6 +23,9 @@ class Hero:
     def __init__(self, name):
         self.name = name
 
+    def simplename(self):
+        return self.name.lower().replace(':', '').replace(' ', '-').replace('ö', 'o')
+
     def __repr__(self):
         return self.name
 

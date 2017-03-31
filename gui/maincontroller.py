@@ -2,6 +2,11 @@ import logging
 import traceback
 
 from PyQt5 import QtCore
+from PyQt5.QtCore import QEvent
+from PyQt5.QtGui import QImage
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QGraphicsPixmapItem
+from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtWidgets import QMainWindow
 
 from compositionbuilder import calculateIdealComposition
@@ -34,29 +39,21 @@ class MainController(QMainWindow):
             self.form.lineupComboBox5,
             self.form.lineupComboBox6
         ]
-        # self.picks_graphicsviews = [
-        #     self.form.picksGraphicsView1,
-        #     self.form.picksGraphicsView2,
-        #     self.form.picksGraphicsView3,
-        #     self.form.picksGraphicsView4,
-        #     self.form.picksGraphicsView5,
-        #     self.form.picksGraphicsView6
-        # ]
-        self.picks_player_labels = [
-            self.form.picksPlayerLabel1,
-            self.form.picksPlayerLabel2,
-            self.form.picksPlayerLabel3,
-            self.form.picksPlayerLabel4,
-            self.form.picksPlayerLabel5,
-            self.form.picksPlayerLabel6
+        self.player_pick_labels = [
+            self.form.playerPickLabel1,
+            self.form.playerPickLabel2,
+            self.form.playerPickLabel3,
+            self.form.playerPickLabel4,
+            self.form.playerPickLabel5,
+            self.form.playerPickLabel6
         ]
-        self.picks_hero_labels = [
-            self.form.picksHeroLabel1,
-            self.form.picksHeroLabel2,
-            self.form.picksHeroLabel3,
-            self.form.picksHeroLabel4,
-            self.form.picksHeroLabel5,
-            self.form.picksHeroLabel6
+        self.hero_graphicsviews = [
+            self.form.heroGraphicsView1,
+            self.form.heroGraphicsView2,
+            self.form.heroGraphicsView3,
+            self.form.heroGraphicsView4,
+            self.form.heroGraphicsView5,
+            self.form.heroGraphicsView6
         ]
 
         for i in range(0, 6):
@@ -65,12 +62,17 @@ class MainController(QMainWindow):
 
             self.lineup_comboboxes[i].setModel(self.model.lineup_models[i])
             self.lineup_comboboxes[i].currentIndexChanged[str].connect(self.index_changed)
-
-        self.form.runButton.clicked.connect(self.on_run)
+        for gv in self.hero_graphicsviews:
+            gv.viewport().installEventFilter(self)
 
         self.form.heroPreferenceTable.setModel(self.model.hero_preference_tm)
 
         self.open("Overwatch Cup - Hero Preferences.csv")
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Wheel:
+            return True
+        return False
 
     def open(self, filename):
         self.model.open(filename)
@@ -78,9 +80,23 @@ class MainController(QMainWindow):
 
     @QtCore.pyqtSlot(str)
     def index_changed(self, index):
-        self.on_run()
+        composition = self.get_composition()
 
-    def on_run(self):
+        for i in range(0, 6):
+            hero = composition[i]
+            cb = self.composition_comboboxes[i]
+            gv = self.hero_graphicsviews[i]
+
+            image = QImage("res/portraits/" + hero.simplename() + ".png")
+
+            scene = QGraphicsScene()
+            item = QGraphicsPixmapItem(QPixmap.fromImage(image))
+            scene.addItem(item)
+            gv.setScene(scene)
+
+        self.run()
+
+    def run(self):
         lineup = self.get_lineup()
         composition = self.get_composition()
 
@@ -89,9 +105,9 @@ class MainController(QMainWindow):
 
             i = 0
             for player, hero in picks:
-                self.picks_hero_labels[i].setText(hero.name)
-                self.picks_player_labels[i].setText(player.battletag)
-                i += 1
+                idx = composition.index(hero)
+                composition[idx] = None
+                self.player_pick_labels[idx].setText(player.battletag)
 
         except:
             logging.error(traceback.format_exc())
